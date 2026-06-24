@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>DTM Tasks</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Montserrat:wght@400;500;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root { --green: #153c36; --gold: #d7a223; --cream: #ddd0c7; --dark: #0e1a18; --text: #f5ede6; --muted: #8a9e9a; --card: #1c2e2a; --border: #2a3e3a; }
+  body { background: var(--dark); color: var(--text); font-family: 'Montserrat', sans-serif; min-height: 100vh; font-size: 14px; }
+  #login-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; }
+  .brand { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; color: var(--gold); letter-spacing: 0.08em; margin-bottom: 6px; text-align: center; }
+  .brand-sub { font-size: 10px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-bottom: 48px; text-align: center; }
+  .login-box { width: 100%; max-width: 320px; }
+  .login-label { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; display: block; }
+  .login-input { width: 100%; background: var(--card); border: 1px solid var(--border); color: var(--text); font-family: 'Montserrat', sans-serif; font-size: 16px; padding: 14px 16px; border-radius: 8px; margin-bottom: 16px; outline: none; transition: border-color 0.2s; }
+  .login-input:focus { border-color: var(--gold); }
+  .login-btn { width: 100%; background: var(--gold); color: var(--dark); font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 16px; border: none; border-radius: 8px; cursor: pointer; }
+  .login-error { color: #e57373; font-size: 12px; text-align: center; margin-top: 12px; display: none; }
+  #app { display: none; }
+  .top-bar { background: var(--green); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); }
+  .top-bar-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--gold); font-weight: 600; }
+  .top-bar-date { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; }
+  .logout-btn { font-size: 11px; color: var(--muted); background: none; border: none; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase; }
+  .refresh-btn { font-size: 11px; color: var(--gold); background: none; border: none; cursor: pointer; margin-right: 12px; }
+  .summary { padding: 16px 20px; display: flex; gap: 12px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .summary-pill { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 8px 16px; white-space: nowrap; font-size: 12px; color: var(--muted); flex-shrink: 0; }
+  .summary-pill span { color: var(--text); font-weight: 600; margin-right: 4px; }
+  .summary-pill.pending span { color: var(--gold); }
+  .summary-pill.done span { color: #81c995; }
+  .filter-tabs { display: flex; padding: 0 20px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .filter-tab { padding: 12px 16px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; font-family: 'Montserrat', sans-serif; transition: all 0.2s; }
+  .filter-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .task-list { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .task-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .task-card.done { opacity: 0.5; border-color: transparent; }
+  .task-header { padding: 14px 16px 10px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .task-type { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 600; padding: 3px 8px; border-radius: 4px; flex-shrink: 0; }
+  .type-birthday { background: #3d1a3a; color: #e8a0e0; }
+  .type-firsttimer { background: #1a2e3d; color: #80c4e8; }
+  .type-inactive { background: #2e1a1a; color: #e88080; }
+  .type-other { background: #2a2e1a; color: #c4e880; }
+  .task-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; color: var(--text); padding: 0 16px 4px; }
+  .task-phone { padding: 0 16px 12px; font-size: 16px; font-weight: 600; color: var(--gold); letter-spacing: 0.05em; }
+  .task-message { margin: 0 16px 12px; background: var(--dark); border-radius: 8px; padding: 12px 14px; font-size: 13px; line-height: 1.6; color: var(--cream); border-left: 2px solid var(--gold); }
+  .task-actions { padding: 0 16px 14px; display: flex; gap: 8px; }
+  .btn-copy { flex: 1; background: var(--gold); color: var(--dark); border: none; border-radius: 8px; padding: 12px; font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .btn-copy.copied { background: #81c995; color: var(--dark); }
+  .btn-whatsapp { background: #25d366; color: white; border: none; border-radius: 8px; padding: 12px 14px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+  .btn-done { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 12px 14px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+  .task-card.done .btn-done { border-color: #81c995; color: #81c995; }
+  .empty-state { text-align: center; padding: 60px 20px; }
+  .empty-icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--gold); margin-bottom: 8px; }
+  .empty-sub { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .loading { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 13px; }
+  .loading-spinner { width: 32px; height: 32px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: #81c995; color: var(--dark); padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: transform 0.3s; z-index: 999; white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .section-heading { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); padding: 8px 20px 4px; }
+  .task-date-badge { font-size: 10px; color: var(--muted); background: var(--dark); padding: 3px 8px; border-radius: 4px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="brand">Don't Tell Mama</div>
+  <div class="brand-sub">Task Centre</div>
+  <div class="login-box">
+    <label class="login-label">Password</label>
+    <input class="login-input" type="password" id="password-input" placeholder="Enter your password" />
+    <button class="login-btn" onclick="login()">Enter</button>
+    <div class="login-error" id="login-error">Wrong password. Try again.</div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">🤫 Tasks</div>
+      <div class="top-bar-date" id="top-date"></div>
+    </div>
+    <div style="display:flex;align-items:center">
+      <button class="refresh-btn" onclick="loadTasks()">↻ Refresh</button>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+  <div class="summary" id="summary"></div>
+  <div class="filter-tabs">
+    <button class="filter-tab active" onclick="setFilter('all', this)">All</button>
+    <button class="filter-tab" onclick="setFilter('pending', this)">Pending</button>
+    <button class="filter-tab" onclick="setFilter('Birthday Invite', this)">Birthday</button>
+    <button class="filter-tab" onclick="setFilter('First Timer D3', this)">First Timer</button>
+    <button class="filter-tab" onclick="setFilter('Inactive 45D', this)">Inactive</button>
+  </div>
+  <div id="task-container"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const PASSWORD  = "dtm2026";
+  const SHEET_ID  = "1IuCOIRvCE4OH9prmEqXaG4Q1VyqpUjW0CtybRROEaH4";
+  const GID       = "1536443059";
+
+  let allTasks = [];
+  let localStatus = JSON.parse(localStorage.getItem('dtm_local_status') || '{}');
+  let currentFilter = 'all';
+
+  function todayStr() {
+    return new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  function login() {
+    const val = document.getElementById('password-input').value;
+    if (val === PASSWORD) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      document.getElementById('top-date').textContent = todayStr();
+      loadTasks();
+    } else {
+      document.getElementById('login-error').style.display = 'block';
+    }
+  }
+
+  document.getElementById('password-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') login();
+  });
+
+  function logout() {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('password-input').value = '';
+  }
+
+  async function loadTasks() {
+    document.getElementById('task-container').innerHTML = `
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        Loading tasks from Mama's CRM...
+      </div>`;
+
+    try {
+      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
+      const res  = await fetch(url);
+      const text = await res.text();
+      const json = JSON.parse(text.substring(47, text.length - 2));
+      const rows = json.table.rows;
+
+      allTasks = [];
+
+      rows.forEach((row) => {
+        const cells = row.c;
+        if (!cells) return;
+
+        // Read date — prefer formatted value (.f) over raw (.v)
+        let date = '';
+        if (cells[0]) {
+          date = cells[0].f || cells[0].v || '';
+        }
+
+        const type    = cells[1]?.v || '';
+        const name    = cells[2]?.v || '';
+        const phone   = String(cells[3]?.v || '');
+        const message = cells[4]?.v || '';
+        const owner   = cells[5]?.v || '';
+        const sheetStatus = cells[6]?.v || 'Pending';
+
+        if (!name || !type) return;
+        if (owner !== 'Reception') return;
+
+        const id = `${date}-${name}-${phone}`.replace(/\s/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
+        const localSt = localStatus[id];
+
+        allTasks.push({ id, date, type, name, phone, message, owner, status: localSt || sheetStatus });
+      });
+
+      render();
+    } catch(e) {
+      console.error(e);
+      document.getElementById('task-container').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">⚠️</div>
+          <div class="empty-title">Couldn't load tasks</div>
+          <div class="empty-sub">Make sure the sheet is set to "Anyone with the link can view".<br><br>Tap Refresh to try again.</div>
+        </div>`;
+    }
+  }
+
+  function setFilter(f, el) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    render();
+  }
+
+  function getTypeClass(type) {
+    if (type === 'Birthday Invite') return 'type-birthday';
+    if (type === 'First Timer D3')  return 'type-firsttimer';
+    if (type === 'Inactive 45D')    return 'type-inactive';
+    return 'type-other';
+  }
+
+  function getTypeLabel(type) {
+    if (type === 'Birthday Invite') return '🎂 Birthday';
+    if (type === 'First Timer D3')  return '⭐ First Timer';
+    if (type === 'Inactive 45D')    return '💤 Win Back';
+    return type;
+  }
+
+  function copyMessage(id) {
+    const task = allTasks.find(t => t.id === id);
+    if (!task) return;
+    navigator.clipboard.writeText(task.message).then(() => {
+      const btn = document.getElementById('copy-btn-' + id);
+      if (btn) { btn.classList.add('copied'); btn.textContent = '✓ Copied'; }
+      setTimeout(() => { if (btn) { btn.classList.remove('copied'); btn.textContent = '📋 Copy Message'; } }, 2000);
+      showToast('Message copied — paste into WhatsApp');
+    });
+  }
+
+  function openWhatsApp(phone, id) {
+    const task = allTasks.find(t => t.id === id);
+    const msg  = encodeURIComponent(task ? task.message : '');
+    const clean = String(phone).replace(/\D/g, '');
+    const full  = clean.startsWith('91') ? clean : '91' + clean;
+    window.open(`https://wa.me/${full}?text=${msg}`, '_blank');
+  }
+
+  function markDone(id) {
+    const task = allTasks.find(t => t.id === id);
+    if (!task) return;
+    task.status = task.status === 'Sent' ? 'Pending' : 'Sent';
+    localStatus[id] = task.status;
+    localStorage.setItem('dtm_local_status', JSON.stringify(localStatus));
+    render();
+    if (task.status === 'Sent') showToast('Marked as sent ✓');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  function render() {
+    let filtered = allTasks;
+    if (currentFilter === 'pending') filtered = allTasks.filter(t => t.status === 'Pending');
+    else if (currentFilter !== 'all') filtered = allTasks.filter(t => t.type === currentFilter);
+
+    const pending = allTasks.filter(t => t.status === 'Pending').length;
+    const done    = allTasks.filter(t => t.status === 'Sent').length;
+
+    document.getElementById('summary').innerHTML = `
+      <div class="summary-pill pending"><span>${pending}</span> Pending</div>
+      <div class="summary-pill done"><span>${done}</span> Sent</div>
+      <div class="summary-pill"><span>${allTasks.length}</span> Total</div>`;
+
+    const container = document.getElementById('task-container');
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🤫</div>
+          <div class="empty-title">All quiet at Mama's</div>
+          <div class="empty-sub">No tasks in this category.<br>Check back after the morning report.</div>
+        </div>`;
+      return;
+    }
+
+    const pendingTasks = filtered.filter(t => t.status === 'Pending');
+    const doneTasks    = filtered.filter(t => t.status !== 'Pending');
+    let html = '';
+
+    if (pendingTasks.length > 0) {
+      html += `<div class="section-heading">To Do — ${pendingTasks.length}</div><div class="task-list">`;
+      pendingTasks.forEach(task => { html += renderCard(task); });
+      html += `</div>`;
+    }
+    if (doneTasks.length > 0) {
+      html += `<div class="section-heading">Sent — ${doneTasks.length}</div><div class="task-list">`;
+      doneTasks.forEach(task => { html += renderCard(task); });
+      html += `</div>`;
+    }
+    container.innerHTML = html;
+  }
+
+  function renderCard(task) {
+    const isDone = task.status === 'Sent';
+    return `
+      <div class="task-card ${isDone ? 'done' : ''}">
+        <div class="task-header">
+          <div class="task-type ${getTypeClass(task.type)}">${getTypeLabel(task.type)}</div>
+          <div class="task-date-badge">${task.date}</div>
+        </div>
+        <div class="task-name">${task.name}</div>
+        <div class="task-phone">${task.phone}</div>
+        <div class="task-message">${task.message}</div>
+        <div class="task-actions">
+          <button class="btn-copy" id="copy-btn-${task.id}" onclick="copyMessage('${task.id}')">📋 Copy Message</button>
+          <button class="btn-whatsapp" onclick="openWhatsApp('${task.phone}', '${task.id}')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          </button>
+          <button class="btn-done" onclick="markDone('${task.id}')">${isDone ? '✓' : '○'}</button>
+        </div>
+      </div>`;
+  }
+</script>
+</body>
+</html>
