@@ -181,7 +181,14 @@
 
       rows.forEach((row, idx) => {
         const cells = row.c;
-        const date     = cells[0]?.v || '';
+        let date = '';
+if (cells[0]) {
+  if (cells[0].f) {
+    date = cells[0].f;
+  } else if (cells[0].v) {
+    date = cells[0].v;
+  }
+}
         const type     = cells[1]?.v || '';
         const name     = cells[2]?.v || '';
         const phone    = cells[3]?.v || '';
